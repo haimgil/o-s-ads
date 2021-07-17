@@ -1,9 +1,12 @@
 package com.maba.osads.services;
 
+import com.maba.osads.helper.IdsHelper;
+import com.maba.osads.persistence.Campaign;
 import com.maba.osads.persistence.Product;
 import com.maba.osads.persistence.ProductRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +60,20 @@ public class ProductService {
                     );
             products.add(product);
         }
+    }
+
+    public Product getProductByCategory(Campaign campaign, String category) {
+        List<String> productIds = IdsHelper.mapCommaSeparatedIdsToList(campaign.getProductIds());
+        List<Product> productsByIds = repository.findAllById(productIds);
+
+        return productsByIds.stream()
+                .filter(p -> category.equalsIgnoreCase(p.getCategory()))
+                .findAny()
+                .orElse(null);
+    }
+
+    public Product getAnyProductFromCampaign(String productIds) {
+        String id = productIds.split(",")[0];
+        return repository.getById(id);
     }
 }
