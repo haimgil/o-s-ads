@@ -6,11 +6,15 @@ import com.maba.osads.persistence.Campaign;
 import com.maba.osads.persistence.CampaignRepository;
 import com.maba.osads.persistence.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CampaignService {
@@ -23,27 +27,42 @@ public class CampaignService {
     @Autowired
     private CampaignRepository campaignRepository;
 
-    public Campaign create(String name, Date startDate, List<String> productIdsToPromote, Long bid){
+    public Campaign create(String name, Date startDate, String productIdsToPromote, Long bid){
         Campaign campaign = new Campaign();
         campaign.setName(name);
         campaign.setStartDate(startDate);
-        campaign.setProductIds(IdsHelper.mapListToCommaSeparatedIds(productIdsToPromote));
+        campaign.setProductIds(productIdsToPromote);
         campaign.setBid(bid);
 
-        return campaign;
+        return campaignRepository.save(campaign);
     }
 
-    public Product findHighestBidCampaignProduct(String category) {
-        List<Campaign> sortedByBidCampaigns = campaignRepository.findAll().stream() //all campaigns stream
+    public Map<Product,List<String>> findHighestBidCampaignProduct(String category) {
+        List<Campaign> campaigns = campaignRepository.findAll();
+        if (campaigns == null || campaigns.isEmpty()){
+            return null;
+        }
+        List<Campaign> sortedByBidCampaigns = campaigns.stream() //all campaigns stream
                 .filter(this::isActiveCampaign) // filter active campaigns
-                .sorted(Comparator.comparingLong(Campaign::getBid)) // Sort by bid
+                .sorted(Comparator.comparingLong(Campaign::getBid).reversed()) // Sort by bid (high to low)
                 .collect(Collectors.toList());
         for (int i=0 ; i < sortedByBidCampaigns.size(); i++){
             Product product = productService.getProductByCategory(sortedByBidCampaigns.get(i), category);
-            if (product != null)
-                return product;
+            if (product != null) {
+                return buildResultMap(sortedByBidCampaigns.get(i), product);
+            }
         }
-        return productService.getAnyProductFromCampaign(sortedByBidCampaigns.get(0).getProductIds());
+        return buildResultMap(sortedByBidCampaigns.get(0), productService.getAnyProductFromCampaign(sortedByBidCampaigns.get(0).getProductIds()));
+    }
+
+    private Map<Product, List<String>> buildResultMap(Campaign campaign, Product product) {
+        Map<Product, List<String>> productToCampaignAndBid = new HashMap<>();
+        List<String> campaignAndBid = new ArrayList<>();
+        campaignAndBid.add(campaign.getName());
+        campaignAndBid.add(String.valueOf(campaign.getBid()));
+        productToCampaignAndBid.put(product, campaignAndBid);
+
+        return productToCampaignAndBid;
     }
 
     //I would use some scheduler to make campaign non active (using kafka/rabbitmq etc...)

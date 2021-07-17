@@ -1,5 +1,6 @@
 package com.maba.osads.persistence;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ public class Campaign {
     @Column(name="name", nullable = false)
     private String name;
     @Column(name="startDate", nullable = false)
+    @JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss")
     private Date startDate;
     @Column(name="bid", nullable = false)
     private Long bid;
