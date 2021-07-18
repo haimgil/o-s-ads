@@ -2,26 +2,30 @@
 Online sponsered ads
 
 PreRequisites:
-- Java 8
+- Java 11
 - maven 3.6.3 (might work with lower version)
 
 Steps to run:
- >> Go to https://github.com/haimgil/o-s-ads/ and clone project 
+ > Go to https://github.com/haimgil/o-s-ads/ and clone project 
  
- >> mvn package
+ > mvn package
  
- >> mvn spring-boot:run
+ > mvn spring-boot:run
  
 Retrive initialized products:
-  >> POST localhost:8080/api/v0/retrieveProducts
+  > POST localhost:8080/api/v0/retrieveProducts
 
 Create Campaign:
-  >> POST localhost:8080/api/v0/advertise/create
+  > POST localhost:8080/api/v0/advertise/create
+
+  > headers
+  >> Content-Type: application/json
   
+  > Body
   >> {"name":"String", "startDate":Date (yyyy-MM-dd'T'HH:mm:ss format}, "productIds":"String" (comma separated ids), "bid":Long}
 
 ServeAd:
-  >> POST localhost:8080/api/v0/advertise/serveAd?category=tv
+  > POST localhost:8080/api/v0/advertise/serveAd?category=tv
   * Response headers contains campaign name and bid for tracking result.
  
  NOTES:
