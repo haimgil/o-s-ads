@@ -41,7 +41,9 @@ public class CampaignController {
         String productIds = campaign.getProductIds();
         Long bid = campaign.getBid();
         if (name == null || start_date == null || productIds == null || bid == null) {
-            ResponseEntity.badRequest().body("Either name, startDate, bid and productIds list must be provided");
+           return ResponseEntity.badRequest()
+                   .header("missingParam", "TRUE")
+                   .body(campaign);
         }
         if (productIds == null || productIds.isEmpty()) {
             logger.warn("Are you sure you want to create campaign with no products specified?!?!");
