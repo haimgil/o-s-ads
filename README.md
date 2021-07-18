@@ -17,9 +17,11 @@ Retrive initialized products:
 
 Create Campaign:
   >> POST localhost:8080/api/v0/advertise/create
+  >> {"name":"String", "":Date (yyyy-MM-dd'T'HH:mm:ss format}, "productIds":"String" (comma separated ids), "bid":Long}
 
 ServeAd:
   >> POST localhost:8080/api/v0/advertise/serveAd?category=tv
+  * Response headers contains campaign name and bid for tracking result.
  
  NOTES:
  * BE written in java with Spring-boot
